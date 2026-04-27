@@ -81,7 +81,7 @@ export default function Footer() {
         <WaveText />
       </div>
 
-      {/* Credits */}
+      {/* Colophon — fictional cartographic edition */}
       <div
         style={{
           position: 'absolute',
@@ -90,42 +90,45 @@ export default function Footer() {
           zIndex: 1,
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.6rem',
+          gap: '0.5rem',
         }}
       >
         <p
           style={{
             fontFamily: 'var(--font-mono-sans)',
             fontWeight: 400,
-            fontSize: '0.65rem',
+            fontSize: '0.6rem',
             textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            color: 'rgba(245,240,232,0.5)',
+            letterSpacing: '0.3em',
+            color: 'rgba(245,240,232,0.45)',
           }}
         >
-          MADE BY CLIENTGROWTH
+          EDITION 001 · MMXXVI
         </p>
-        <a
-          href="https://clientgrowth.ca"
-          target="_blank"
-          rel="noopener noreferrer"
+        <p
           style={{
             fontFamily: 'var(--font-mono-sans)',
             fontWeight: 400,
-            fontSize: '0.65rem',
+            fontSize: '0.6rem',
             textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            color: 'rgba(245,240,232,0.5)',
-            textDecoration: 'none',
-            transition: 'color 400ms',
+            letterSpacing: '0.3em',
+            color: 'rgba(245,240,232,0.45)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(245,240,232,1)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(245,240,232,0.5)' }}
-          onFocus={(e) => { e.currentTarget.style.outline = '1px solid var(--accent-sepia)' }}
-          onBlur={(e) => { e.currentTarget.style.outline = '' }}
         >
-          clientgrowth.ca
-        </a>
+          CARTOGRAPHER UNKNOWN
+        </p>
+        <p
+          style={{
+            fontFamily: 'var(--font-mono-sans)',
+            fontWeight: 400,
+            fontSize: '0.55rem',
+            letterSpacing: '0.15em',
+            color: 'rgba(245,240,232,0.25)',
+            marginTop: '0.4rem',
+          }}
+        >
+          A field exercise by Juan Bedoya · Laval
+        </p>
       </div>
     </footer>
   )

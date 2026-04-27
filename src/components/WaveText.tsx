@@ -21,6 +21,18 @@ const COLORS = [
 const HEIGHT_FACTOR = 0.8
 const ANIMATION_DURATION = 4
 
+// Pre-process phrase into word groups with global char indices
+// so flex wrapping never splits a word mid-character
+const WORD_GROUPS: { char: string; globalIdx: number }[][] = (() => {
+  const words = PHRASE.split(' ')
+  let gi = 0
+  return words.map((word) => {
+    const chars = word.split('').map((char) => ({ char, globalIdx: gi++ }))
+    gi++ // account for the space
+    return chars
+  })
+})()
+
 export default function WaveText() {
   const rafRef = useRef<number>(0)
   const timeRef = useRef<number>(0)
@@ -46,8 +58,6 @@ export default function WaveText() {
     rafRef.current = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(rafRef.current)
   }, [])
-
-  const chars = PHRASE.split('')
 
   if (!mounted) {
     return (
@@ -76,43 +86,44 @@ export default function WaveText() {
         display: 'flex',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: '0 0.02em',
+        gap: '0 0.3em',
         padding: '0 2rem',
         maxWidth: '80vw',
       }}
     >
-      {chars.map((char, i) => {
-        if (char === ' ') {
-          return (
-            <span key={i} style={{ width: '0.3em', display: 'inline-block' }} aria-hidden="true" />
-          )
-        }
+      {WORD_GROUPS.map((wordChars, wi) => (
+        <span
+          key={wi}
+          style={{ display: 'inline-flex', whiteSpace: 'nowrap' }}
+          aria-hidden="true"
+        >
+          {wordChars.map(({ char, globalIdx: i }) => {
+            const phase = (i * 0.4) - (timeRef.current * (2 * Math.PI / ANIMATION_DURATION))
+            const yOffset = reduced ? 0 : Math.sin(phase) * HEIGHT_FACTOR * 8
+            const colorIdx = Math.abs(Math.floor((i * 0.4 + timeRef.current * 0.5))) % COLORS.length
+            const shadowColor = COLORS[(colorIdx + 1) % COLORS.length]
 
-        const phase = (i * 0.4) - (timeRef.current * (2 * Math.PI / ANIMATION_DURATION))
-        const yOffset = reduced ? 0 : Math.sin(phase) * HEIGHT_FACTOR * 8
-        const colorIdx = Math.abs(Math.floor((i * 0.4 + timeRef.current * 0.5))) % COLORS.length
-        const shadowColor = COLORS[(colorIdx + 1) % COLORS.length]
-
-        return (
-          <span
-            key={i}
-            aria-hidden="true"
-            style={{
-              display: 'inline-block',
-              fontFamily: 'var(--font-editorial)',
-              fontWeight: 300,
-              fontStyle: 'italic',
-              fontSize: 'clamp(2rem, 6vw, 5rem)',
-              color: reduced ? 'var(--paper)' : COLORS[colorIdx],
-              transform: `translateY(${yOffset}px)`,
-              textShadow: reduced ? 'none' : `0 2px 12px ${shadowColor}60`,
-              lineHeight: 1.1,
-            }}
-          >
-            {char}
-          </span>
-        )
-      })}
+            return (
+              <span
+                key={i}
+                style={{
+                  display: 'inline-block',
+                  fontFamily: 'var(--font-editorial)',
+                  fontWeight: 300,
+                  fontStyle: 'italic',
+                  fontSize: 'clamp(2rem, 6vw, 5rem)',
+                  color: reduced ? 'var(--paper)' : COLORS[colorIdx],
+                  transform: `translateY(${yOffset}px)`,
+                  textShadow: reduced ? 'none' : `0 2px 12px ${shadowColor}60`,
+                  lineHeight: 1.1,
+                }}
+              >
+                {char}
+              </span>
+            )
+          })}
+        </span>
+      ))}
     </div>
   )
 }
