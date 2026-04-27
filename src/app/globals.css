@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F5F0E8;
+  --color-paper-deep: #EDE6D8;
+  --color-paper-shadow: #DDD3BF;
+  --color-ink: #1A1815;
+  --color-ink-soft: #3A352E;
+  --color-ink-faded: #6B6358;
+  --color-accent-sepia: #8B6F47;
+  --color-accent-moss: #5C5A3E;
+
+  --font-editorial: 'Fraunces', 'PP Editorial New', serif;
+  --font-mono-sans: 'Inter Tight', 'PP Neue Montreal', sans-serif;
+
+  --ease-cinema: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  --paper: #F5F0E8;
+  --paper-deep: #EDE6D8;
+  --paper-shadow: #DDD3BF;
+  --ink: #1A1815;
+  --ink-soft: #3A352E;
+  --ink-faded: #6B6358;
+  --accent-sepia: #8B6F47;
+  --accent-moss: #5C5A3E;
+  --font-editorial: 'Fraunces', 'PP Editorial New', serif;
+  --font-mono-sans: 'Inter Tight', 'PP Neue Montreal', sans-serif;
+  --ease-cinema: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono-sans);
+  overflow-x: hidden;
+}
+
+/* Prevent FOUC — hide body until fonts load */
+.fonts-loading body {
+  visibility: hidden;
+}
