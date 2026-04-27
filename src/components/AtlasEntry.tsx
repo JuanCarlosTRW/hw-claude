@@ -100,7 +100,7 @@ export default function AtlasEntry({
         rowGap: '2rem',
         maxWidth: '1400px',
         margin: '0 auto',
-        padding: '8rem 2rem',
+        padding: isFirst ? '3rem 2rem 8rem' : '8rem 2rem',
       }}
     >
       {/* Image side */}

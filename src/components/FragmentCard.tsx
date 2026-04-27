@@ -9,6 +9,8 @@ interface FragmentCardProps {
   objectPosition?: string
   imageScale?: number
   isMobile?: boolean
+  isActive?: boolean
+  isInactive?: boolean
 }
 
 export default function FragmentCard({
@@ -18,34 +20,29 @@ export default function FragmentCard({
   objectPosition = 'center',
   imageScale = 1,
   isMobile = false,
+  isActive = false,
+  isInactive = false,
 }: FragmentCardProps) {
   const width = isMobile ? '30vw' : 'clamp(140px, 14vw, 220px)'
 
   return (
     <div
-      className="group"
       style={{
         width,
         aspectRatio: '3/4',
         transformOrigin: 'bottom center',
-        border: '1px solid var(--paper-shadow)',
-        boxShadow: '0 20px 40px -15px rgba(26,24,21,0.15)',
+        border: isActive
+          ? '1px solid var(--accent-sepia)'
+          : '1px solid var(--paper-shadow)',
+        boxShadow: isActive
+          ? '0 50px 80px -20px rgba(26,24,21,0.45)'
+          : '0 20px 40px -15px rgba(26,24,21,0.15)',
         background: 'var(--paper-deep)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        transition: 'transform 400ms var(--ease-soft), box-shadow 400ms var(--ease-soft)',
-        cursor: 'default',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget
-        el.style.transform = 'translateY(-8px)'
-        el.style.boxShadow = '0 40px 60px -20px rgba(26,24,21,0.3)'
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget
-        el.style.transform = ''
-        el.style.boxShadow = '0 20px 40px -15px rgba(26,24,21,0.15)'
+        transition: 'border-color 400ms var(--ease-soft), box-shadow 400ms var(--ease-soft)',
+        cursor: 'pointer',
       }}
     >
       {/* Image — top 75% */}
@@ -59,6 +56,7 @@ export default function FragmentCard({
             objectFit: 'cover',
             objectPosition,
             transform: `scale(${imageScale})`,
+            transition: 'transform 600ms var(--ease-soft)',
           }}
           sizes="(max-width: 768px) 30vw, clamp(140px, 14vw, 220px)"
         />
@@ -74,26 +72,15 @@ export default function FragmentCard({
         }}
       >
         <span
-          className="card-label"
           style={{
             fontFamily: 'var(--font-mono-sans)',
             fontSize: '0.55rem',
             textTransform: 'uppercase',
             letterSpacing: '0.25em',
-            color: 'var(--ink-faded)',
-            opacity: 0.3,
+            color: isActive ? 'var(--ink)' : 'var(--ink-faded)',
+            opacity: isActive ? 1 : isInactive ? 0.3 : 0.3,
             transition: 'opacity 400ms var(--ease-soft), color 400ms var(--ease-soft)',
             lineHeight: 1.4,
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget
-            el.style.opacity = '1'
-            el.style.color = 'var(--ink)'
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget
-            el.style.opacity = '0.3'
-            el.style.color = 'var(--ink-faded)'
           }}
         >
           {fragment}<br />{label}

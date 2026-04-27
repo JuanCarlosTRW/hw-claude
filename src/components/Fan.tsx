@@ -32,6 +32,7 @@ export default function Fan({ cards, direction }: FanProps) {
   const fanRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const [isMobile, setIsMobile] = useState(false)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')
@@ -41,10 +42,10 @@ export default function Fan({ cards, direction }: FanProps) {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // Scroll-driven fan opening
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReduced) {
-      // Show fully opened state immediately
       const rotations = ROTATIONS[direction]
       const offsets = X_OFFSETS[direction]
       cardRefs.current.forEach((ref, i) => {
@@ -80,6 +81,24 @@ export default function Fan({ cards, direction }: FanProps) {
     return () => ctx.revert()
   }, [direction, isMobile])
 
+  // Click-driven pop: scale up active card, dim siblings
+  useEffect(() => {
+    cardRefs.current.forEach((ref, i) => {
+      if (!ref) return
+      if (activeIndex === null) {
+        gsap.to(ref, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' })
+      } else if (i === activeIndex) {
+        gsap.to(ref, { scale: 1.18, opacity: 1, zIndex: 20, duration: 0.4, ease: 'power2.out' })
+      } else {
+        gsap.to(ref, { scale: 0.88, opacity: 0.45, zIndex: 1, duration: 0.4, ease: 'power2.out' })
+      }
+    })
+  }, [activeIndex])
+
+  const handleCardClick = (i: number) => {
+    setActiveIndex(prev => prev === i ? null : i)
+  }
+
   return (
     <div
       ref={fanRef}
@@ -101,8 +120,14 @@ export default function Fan({ cards, direction }: FanProps) {
             bottom: 0,
             transformOrigin: 'bottom center',
           }}
+          onClick={() => handleCardClick(i)}
         >
-          <FragmentCard {...card} isMobile={isMobile} />
+          <FragmentCard
+            {...card}
+            isMobile={isMobile}
+            isActive={activeIndex === i}
+            isInactive={activeIndex !== null && activeIndex !== i}
+          />
         </div>
       ))}
     </div>

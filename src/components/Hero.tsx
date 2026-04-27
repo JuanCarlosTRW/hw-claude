@@ -11,6 +11,7 @@ export default function Hero() {
   const paperOverlayRef = useRef<HTMLDivElement>(null)
   const heroTextRef = useRef<HTMLDivElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
+  const h1Ref = useRef<HTMLHeadingElement>(null)
   const videoFrameRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -18,16 +19,15 @@ export default function Hero() {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (prefersReduced) {
-      // Immediately show final states
       if (heroTextRef.current) gsap.set(heroTextRef.current, { opacity: 1, x: 0, y: 0 })
       if (subtitleRef.current) gsap.set(subtitleRef.current, { opacity: 1 })
       return
     }
 
     const ctx = gsap.context(() => {
-      // Entrance: hero text slides in from lower-left after 2s
+      // Entrance: text rises from slightly below into center position
       gsap.from(heroTextRef.current, {
-        x: -60,
+        x: -40,
         y: 30,
         opacity: 0,
         duration: 1.8,
@@ -43,14 +43,6 @@ export default function Hero() {
       // Scroll-driven pin + shrink transition
       const tl = gsap.timeline({ paused: true })
 
-      // 0–30%: hero text exits up
-      tl.to(heroTextRef.current, {
-        y: -40,
-        opacity: 0,
-        duration: 0.3,
-        ease: 'none',
-      }, 0)
-
       // 0–100%: paper overlay fades in (page turns to cream)
       tl.to(paperOverlayRef.current, {
         opacity: 1,
@@ -58,8 +50,20 @@ export default function Hero() {
         ease: 'none',
       }, 0)
 
+      // 0–100%: hero text transitions from cream (on video) to ink (on paper)
+      // Use resolved hex values — GSAP cannot animate CSS custom properties
+      tl.to(h1Ref.current, {
+        color: '#1A1815', // --ink
+        duration: 1,
+        ease: 'none',
+      }, 0)
+      tl.to(subtitleRef.current, {
+        color: '#6B6358', // --ink-faded
+        duration: 1,
+        ease: 'none',
+      }, 0)
+
       // 0–100%: video wrapper shrinks from full-bleed to left-side card
-      // Use percentage-based sizing to avoid 100vw/100vh issues in preview
       const sectionW = sectionRef.current?.offsetWidth ?? window.innerWidth
       const sectionH = sectionRef.current?.offsetHeight ?? window.innerHeight
       tl.fromTo(videoWrapRef.current,
@@ -68,7 +72,7 @@ export default function Hero() {
           width: sectionW * 0.33,
           height: sectionH * 0.55,
           left: sectionW * 0.08,
-          top: sectionH * 0.18,
+          top: sectionH * 0.22,
           ease: 'none',
           duration: 1,
         }, 0
@@ -82,7 +86,6 @@ export default function Hero() {
       }, 0.5)
 
       // 80–100%: Entry 001 text slides in from right
-      // Note: selector is intentionally outside sectionRef scope — query from document
       const entry001Text = document.querySelector('[data-entry-001-text]')
       if (entry001Text) {
         tl.to(entry001Text, {
@@ -97,7 +100,7 @@ export default function Hero() {
         trigger: sectionRef.current,
         pin: true,
         start: 'top top',
-        end: '+=120%',
+        end: '+=70%',
         scrub: 1.2,
         animation: tl,
         onLeave: () => {
@@ -122,10 +125,7 @@ export default function Hero() {
       {/* Video wrapper — starts full-bleed, shrinks to left card on scroll */}
       <div
         ref={videoWrapRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-        }}
+        style={{ position: 'absolute', inset: 0 }}
       >
         <video
           ref={videoRef}
@@ -144,7 +144,7 @@ export default function Hero() {
           }}
           src={VIDEO_SRC}
         />
-        {/* Frame overlay — appears as video shrinks */}
+        {/* Frame — appears as video shrinks to card */}
         <div
           ref={videoFrameRef}
           style={{
@@ -158,7 +158,7 @@ export default function Hero() {
         />
       </div>
 
-      {/* Sepia overlay to pull video into manuscript palette */}
+      {/* Sepia overlay */}
       <div
         style={{
           position: 'absolute',
@@ -169,18 +169,27 @@ export default function Hero() {
         }}
       />
 
-      {/* Vignette — heavier at bottom to frame text */}
+      {/* Top gradient — darkens sky to make title readable */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(ellipse at 50% 80%, transparent 30%, rgba(26,24,21,0.75) 100%)',
-          opacity: 0.55,
+          background: 'linear-gradient(180deg, rgba(26,24,21,0.62) 0%, rgba(26,24,21,0.25) 42%, transparent 65%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Paper overlay for scroll transition — fades to cream as hero shrinks */}
+      {/* Bottom vignette — frames the lower portion */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(0deg, rgba(26,24,21,0.55) 0%, transparent 45%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Paper overlay — fades in as video shrinks */}
       <div
         ref={paperOverlayRef}
         style={{
@@ -193,23 +202,28 @@ export default function Hero() {
         }}
       />
 
-      {/* Hero text */}
+      {/* Hero text — centered, upper third, stays visible throughout.
+          No CSS transform here — GSAP manages transforms via the entrance animation. */}
       <div
         ref={heroTextRef}
         style={{
           position: 'absolute',
-          left: '8vw',
-          bottom: '22vh',
+          top: '18vh',
+          left: 0,
+          right: 0,
           zIndex: 10,
+          textAlign: 'center',
+          padding: '0 5%',
         }}
       >
         <h1
+          ref={h1Ref}
           style={{
             fontFamily: 'var(--font-editorial)',
             fontWeight: 300,
             fontStyle: 'italic',
-            fontSize: 'clamp(3rem, 8vw, 7rem)',
-            color: 'var(--paper)',
+            fontSize: 'clamp(3rem, 7vw, 6.5rem)',
+            color: '#F5F0E8', /* --paper hex — GSAP needs resolved value, not CSS var */
             lineHeight: 1.05,
             letterSpacing: '-0.01em',
           }}
@@ -223,9 +237,9 @@ export default function Hero() {
             fontWeight: 400,
             textTransform: 'uppercase',
             letterSpacing: '0.3em',
-            fontSize: '0.7rem',
+            fontSize: '0.65rem',
             color: 'rgba(245,240,232,0.7)',
-            marginTop: '1.25rem',
+            marginTop: '1.5rem',
           }}
         >
           A cartographic review of places that have never existed.

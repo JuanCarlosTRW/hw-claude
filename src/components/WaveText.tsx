@@ -3,13 +3,23 @@
 import { useEffect, useRef, useState } from 'react'
 
 const PHRASE = 'Some places are not found. They are imagined.'
+
+// Light cream-to-sepia palette — readable against the dark ink background
 const COLORS = [
-  '#8B6F47', '#6B5538', '#5C4A2E', '#4A3D26',
-  '#3A2F1E', '#2A2218', '#1A1815', '#3A352E',
-  '#5C5A3E', '#8B6F47',
+  '#F5F0E8',
+  '#EDE6D8',
+  '#DDD3BF',
+  '#C8B08A',
+  '#B89060',
+  '#A07848',
+  '#8B6F47',
+  '#C8B08A',
+  '#EDE6D8',
+  '#F5F0E8',
 ]
+
 const HEIGHT_FACTOR = 0.8
-const ANIMATION_DURATION = 4 // seconds
+const ANIMATION_DURATION = 4
 
 export default function WaveText() {
   const rafRef = useRef<number>(0)
@@ -39,7 +49,6 @@ export default function WaveText() {
 
   const chars = PHRASE.split('')
 
-  // Render static text on server and before mount to avoid hydration mismatch
   if (!mounted) {
     return (
       <p
@@ -49,7 +58,7 @@ export default function WaveText() {
           fontWeight: 300,
           fontStyle: 'italic',
           fontSize: 'clamp(2rem, 6vw, 5rem)',
-          color: '#8B6F47',
+          color: 'var(--paper)',
           lineHeight: 1.1,
           textAlign: 'center',
           padding: '0 2rem',
@@ -94,10 +103,9 @@ export default function WaveText() {
               fontWeight: 300,
               fontStyle: 'italic',
               fontSize: 'clamp(2rem, 6vw, 5rem)',
-              color: reduced ? '#8B6F47' : COLORS[colorIdx],
+              color: reduced ? 'var(--paper)' : COLORS[colorIdx],
               transform: `translateY(${yOffset}px)`,
-              textShadow: reduced ? 'none' : `1px 2px 4px ${shadowColor}40`,
-              transition: reduced ? 'none' : undefined,
+              textShadow: reduced ? 'none' : `0 2px 12px ${shadowColor}60`,
               lineHeight: 1.1,
             }}
           >

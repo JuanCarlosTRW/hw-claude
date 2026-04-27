@@ -19,13 +19,14 @@ export default function Footer() {
       style={{
         position: 'relative',
         width: '100%',
-        height: '100vh',
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         background: 'var(--ink)',
         overflow: 'hidden',
+        padding: '10vh 2rem',
       }}
     >
       {/* Atmospheric blurred video background */}
@@ -52,21 +53,31 @@ export default function Footer() {
       <p
         style={{
           position: 'absolute',
-          top: '12vh',
+          top: '8vh',
           fontFamily: 'var(--font-mono-sans)',
           fontWeight: 400,
           fontSize: '0.7rem',
           textTransform: 'uppercase',
           letterSpacing: '0.4em',
-          color: 'rgba(237,230,216,0.6)',
+          color: 'rgba(237,230,216,0.8)',
           zIndex: 1,
         }}
       >
         CLOSING RECORD
       </p>
 
-      {/* Wave text */}
-      <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+      {/* Wave text — generous vertical breathing room */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          textAlign: 'center',
+          padding: '6vh 0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <WaveText />
       </div>
 
@@ -74,12 +85,12 @@ export default function Footer() {
       <div
         style={{
           position: 'absolute',
-          bottom: '3rem',
+          bottom: '4rem',
           textAlign: 'center',
           zIndex: 1,
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.5rem',
+          gap: '0.6rem',
         }}
       >
         <p
@@ -106,10 +117,10 @@ export default function Footer() {
             letterSpacing: '0.2em',
             color: 'rgba(245,240,232,0.5)',
             textDecoration: 'none',
-            transition: 'opacity 400ms',
+            transition: 'color 400ms',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'rgba(245,240,232,1)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = ''; e.currentTarget.style.color = 'rgba(245,240,232,0.5)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(245,240,232,1)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(245,240,232,0.5)' }}
           onFocus={(e) => { e.currentTarget.style.outline = '1px solid var(--accent-sepia)' }}
           onBlur={(e) => { e.currentTarget.style.outline = '' }}
         >
