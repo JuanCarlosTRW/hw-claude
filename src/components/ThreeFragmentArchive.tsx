@@ -151,8 +151,9 @@ export default function ThreeFragmentArchive() {
     FRAGMENTS.forEach((frag, i) => {
       const geo = new THREE.PlaneGeometry(PLANE_W, PLANE_H)
 
-      // Placeholder material until texture loads
-      const mat = new THREE.MeshBasicMaterial({ color: 0x3a352e })
+      // Placeholder material until texture loads. transparent=true lets us
+      // ease opacity between non-hover (0.78) and hover (1.0) states.
+      const mat = new THREE.MeshBasicMaterial({ color: 0x3a352e, transparent: true, opacity: 0.78 })
       const mesh = new THREE.Mesh(geo, mat)
 
       const [x, y, z] = BASE_POSITIONS[i]
@@ -195,14 +196,17 @@ export default function ThreeFragmentArchive() {
     // ── State refs ─────────────────────────────────────────────────────────
     let isZoomed = false
     const scaleTargets = new Array(FRAGMENTS.length).fill(1) as number[]
+    const zOffsets = new Array(FRAGMENTS.length).fill(0) as number[]
+    const opacityTargets = new Array(FRAGMENTS.length).fill(0.85) as number[]
 
     // Camera smooth targets
     const cam = { tx: 0, ty: 0, tz: 11, cx: 0, cy: 0, cz: 11 }
     const look = { tx: 0, ty: 0, cx: 0, cy: 0 }
 
-    // Drag
+    // Drag (group Y) + parallax (group X+Y, additive on top of drag)
     const drag = { active: false, startX: 0, baseGroupY: 0 }
     const groupRotY = { target: 0, current: 0 }
+    const parallax = { tx: 0, ty: 0, cx: 0, cy: 0 }
 
     // ── Close handler (called from React overlay) ───────────────────────────
     closeRef.current = () => {
@@ -221,6 +225,12 @@ export default function ThreeFragmentArchive() {
 
     function onMouseMove(e: MouseEvent) {
       updateMouse(e)
+      // Parallax — driven by normalized mouse coords, eased in render loop.
+      // Disabled during zoom so the camera focus isn't fought by parallax.
+      if (!isZoomed) {
+        parallax.tx = mouse.x * 0.12   // group rotates on Y axis with horizontal mouse
+        parallax.ty = -mouse.y * 0.08  // and on X axis with vertical mouse (inverted)
+      }
       if (drag.active && !isZoomed) {
         const deltaX = e.clientX - drag.startX
         groupRotY.target = drag.baseGroupY + deltaX * 0.003
@@ -315,29 +325,44 @@ export default function ThreeFragmentArchive() {
 
       meshes.forEach((mesh, i) => {
         const { basePos, baseRotZ, phase } = mesh.userData
-        const [bx, by] = basePos
+        const [bx, by, bz] = basePos
 
-        // Gentle floating
+        // Hover targets — only update while not zoomed (zoom owns the state)
+        if (!isZoomed) {
+          const isHovered = hovered === mesh
+          scaleTargets[i] = isHovered ? 1.08 : 1
+          zOffsets[i] = isHovered ? 0.55 : 0       // hover advances mesh toward camera
+          opacityTargets[i] = isHovered ? 1.0 : 0.85
+        }
+
+        // Ease the per-mesh Z offset (R3F-style hover advance) on top of base Z
+        const easedZ = lerp(mesh.userData.currentZOffset ?? 0, zOffsets[i], 0.1)
+        mesh.userData.currentZOffset = easedZ
+
+        // Gentle floating + hover Z combined
         mesh.position.y = by + Math.sin(time * 0.32 + phase) * 0.09
         mesh.position.x = bx + Math.sin(time * 0.18 + phase * 1.4) * 0.035
+        mesh.position.z = bz + easedZ
         mesh.rotation.z = baseRotZ + Math.sin(time * 0.22 + phase * 0.9) * 0.015
-
-        // Hover scale target (only when not zoomed)
-        if (!isZoomed) {
-          scaleTargets[i] = hovered === mesh ? 1.08 : 1
-        }
 
         // Smooth scale
         mesh.scale.x = lerp(mesh.scale.x, scaleTargets[i], 0.07)
         mesh.scale.y = lerp(mesh.scale.y, scaleTargets[i], 0.07)
+
+        // Smooth opacity
+        const mat = mesh.material as THREE.MeshBasicMaterial
+        mat.opacity = lerp(mat.opacity, opacityTargets[i], 0.08)
       })
 
       // Cursor
       container.style.cursor = (!isZoomed && hovered) ? 'pointer' : 'default'
 
-      // Group drag rotation
+      // Group drag rotation (Y) + mouse parallax (Y additive, X exclusive)
       groupRotY.current = lerp(groupRotY.current, groupRotY.target, 0.055)
-      group.rotation.y = groupRotY.current
+      parallax.cx = lerp(parallax.cx, parallax.tx, 0.05)
+      parallax.cy = lerp(parallax.cy, parallax.ty, 0.05)
+      group.rotation.y = groupRotY.current + parallax.cx
+      group.rotation.x = parallax.cy
 
       // Camera lerp
       cam.cx = lerp(cam.cx, cam.tx, 0.038)

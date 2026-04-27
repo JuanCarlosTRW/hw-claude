@@ -2,6 +2,7 @@ import IntroLoader from '@/components/IntroLoader'
 import Hero from '@/components/Hero'
 import AtlasEntry from '@/components/AtlasEntry'
 import FragmentArchive from '@/components/FragmentArchive'
+import SignalSection from '@/components/SignalSection'
 import Footer from '@/components/Footer'
 
 export default function Page() {
@@ -43,6 +44,7 @@ export default function Page() {
       </section>
 
       <FragmentArchive />
+      <SignalSection />
       <Footer />
     </main>
   )
